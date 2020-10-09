@@ -1,14 +1,13 @@
 using System;
+
 using Android.App;
 using Android.OS;
 using Android.Runtime;
 using Plugin.CurrentActivity;
-using BikeSharing.Clients.Core;
-using HockeyApp.Android;
 
 namespace BikeSharing.Clients.Droid
 {
-    //You can specify additional application information in this attribute
+	//You can specify additional application information in this attribute
     [Application]
     public class MainApplication : Application, Application.IActivityLifecycleCallbacks
     {
@@ -20,10 +19,8 @@ namespace BikeSharing.Clients.Droid
         public override void OnCreate()
         {
             base.OnCreate();
-
             RegisterActivityLifecycleCallbacks(this);
-
-			HockeyApp.Android.CrashManager.Register(this, GlobalSettings.HockeyAppAPIKeyForAndroid, new AutoReportingCrashManagerListener());
+            //A great place to initialize Xamarin.Insights and Dependency Services!
         }
 
         public override void OnTerminate()
@@ -63,9 +60,4 @@ namespace BikeSharing.Clients.Droid
         {
         }
     }
-
-	internal class AutoReportingCrashManagerListener : CrashManagerListener 
-	{
-		public override bool ShouldAutoUploadCrashes() => true;
-	}
 }

@@ -1,5 +1,4 @@
-﻿using Acr.UserDialogs;
-using Android.App;
+﻿using Android.App;
 using Android.Content.PM;
 using Android.OS;
 using BikeSharing.Clients.Core.ViewModels.Base;
@@ -25,7 +24,7 @@ namespace BikeSharing.Clients.Droid
 
             Forms.Init(this, bundle);
             Xamarin.FormsMaps.Init(this, bundle);
-            UserDialogs.Init(this);
+            //UserDialogs.Init(this);
             CachedImageRenderer.Init();
 			ViewModelLocator.Instance.Register<IOperatingSystemVersionProvider, OperatingSystemVersionProvider>();
 

@@ -9,6 +9,7 @@ using BikeSharing.Clients.Core.Helpers;
 using System.Linq;
 using Xamarin.Forms.Maps;
 using System.Collections.Generic;
+using BikeSharing.Clients.Droid.Renderers.CustomMap;
 
 [assembly: ExportRenderer(typeof(CustomMap), typeof(CustomMapRenderer))]
 namespace BikeSharing.Clients.Droid.Renderers
@@ -37,32 +38,36 @@ namespace BikeSharing.Clients.Droid.Renderers
         {
             base.OnElementPropertyChanged(sender, e);
 
-            var androidMapView = (MapView)Control;
-            var formsMap = (CustomMap)sender;
+            var androidMapView = Control;
+            var formsMap = (Core.Controls.CustomMap)sender;
 
-            if (e.PropertyName.Equals("CustomPins") && !_isDrawnDone)
+            androidMapView.GetMapAsync(new OnMapReadyCallback(map =>
             {
-                ClearPushPins(androidMapView);
+                if (e.PropertyName.Equals("CustomPins") && !_isDrawnDone)
+                {
+                    ClearPushPins(map);
 
-                androidMapView.Map.MarkerClick += HandleMarkerClick;
-                androidMapView.Map.MyLocationEnabled = formsMap.IsShowingUser;
+                    map.MarkerClick += HandleMarkerClick;
+                    map.MyLocationEnabled = formsMap.IsShowingUser;
 
-                AddPushPins(androidMapView, formsMap.CustomPins);
+                    AddPushPins(map, formsMap.CustomPins);
 
-                PositionMap();
+                    PositionMap();
 
-                _isDrawnDone = true;
-            }
+                    _isDrawnDone = true;
+                }
 
-            if (e.PropertyName.Equals("From"))
-            {
-                AddFromPushPin(androidMapView, formsMap.From);
-            }
+                if (e.PropertyName.Equals("From"))
+                {
+                    AddFromPushPin(map, formsMap.From);
+                }
 
-            if (e.PropertyName.Equals("To"))
-            {
-                AddToPushPin(androidMapView, formsMap.To);
-            }
+                if (e.PropertyName.Equals("To"))
+                {
+                    AddToPushPin(map, formsMap.To);
+                }
+            }));
+            
         }
 
         void HandleMarkerClick(object sender, GoogleMap.MarkerClickEventArgs e)
@@ -70,7 +75,7 @@ namespace BikeSharing.Clients.Droid.Renderers
             var marker = e.Marker;
             marker.ShowInfoWindow();
 
-            var myMap = this.Element as CustomMap;
+            var myMap = this.Element as Core.Controls.CustomMap;
 
             var tempMarker = _tempMarkers
                 .FirstOrDefault(m => m.MarkerOptions.Position.Latitude 
@@ -138,12 +143,12 @@ namespace BikeSharing.Clients.Droid.Renderers
             }
         }
 
-        private void ClearPushPins(MapView mapView)
+        private void ClearPushPins(GoogleMap mapView)
         {
-            mapView.Map.Clear();
+            mapView.Clear();
         }
 
-        private void AddPushPins(MapView mapView, IEnumerable<CustomPin> pins)
+        private void AddPushPins(GoogleMap map, IEnumerable<CustomPin> pins)
         {
             foreach (var formsPin in pins)
             {
@@ -158,7 +163,7 @@ namespace BikeSharing.Clients.Droid.Renderers
                 else
                     markerWithIcon.SetIcon(BitmapDescriptorFactory.DefaultMarker());
 
-                mapView.Map.AddMarker(markerWithIcon);
+                map.AddMarker(markerWithIcon);
 
                 _tempMarkers.Add(new CustomMarkerOptions
                 {
@@ -168,15 +173,15 @@ namespace BikeSharing.Clients.Droid.Renderers
             }
         }
 
-        private void AddPushPins(MapView mapView, IEnumerable<CustomMarkerOptions> markers)
+        private void AddPushPins(GoogleMap map, IEnumerable<CustomMarkerOptions> markers)
         {
             foreach (var marker in markers)
             {
-                mapView.Map.AddMarker(marker.MarkerOptions);
+                map.AddMarker(marker.MarkerOptions);
             }
         }
 
-        private void AddFromPushPin(MapView mapView, CustomPin from)
+        private void AddFromPushPin(GoogleMap map, CustomPin from)
         {
             // Reset previous From pushpin
             var fromTempMarker = _tempMarkers
@@ -201,11 +206,11 @@ namespace BikeSharing.Clients.Droid.Renderers
                 }
             }
 
-            ClearPushPins(mapView);
-            AddPushPins(mapView, _tempMarkers);
+            ClearPushPins(map);
+            AddPushPins(map, _tempMarkers);
         }
 
-        private void AddToPushPin(MapView mapView, CustomPin to)
+        private void AddToPushPin(GoogleMap map, CustomPin to)
         {
             // Reset previous To pushpin
             var toTempMarker = _tempMarkers
@@ -230,13 +235,13 @@ namespace BikeSharing.Clients.Droid.Renderers
                 }
             }
 
-            ClearPushPins(mapView);
-            AddPushPins(mapView, _tempMarkers);
+            ClearPushPins(map);
+            AddPushPins(map, _tempMarkers);
         }
 
         private void PositionMap()
         {
-            var myMap = this.Element as CustomMap;
+            var myMap = this.Element as Core.Controls.CustomMap;
             var formsPins = myMap.CustomPins;
 
             if (formsPins == null || formsPins.Count() == 0)
